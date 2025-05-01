@@ -1,6 +1,6 @@
 # micropython-mcp23Sxx
 
-Micropython SPI version of the micropython-mcp230xx driver by dsiggi.
+Micropython SPI version of https://github.com/dsiggi/micropython-mcp230xx (I2C).
 
 This is a work in progress, NOT a working driver (yet). This readme is not fully updated yet, consider anything below this as incorrect in regards to this fork!
 
