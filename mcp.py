@@ -18,7 +18,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-from machine import Pin, I2C
+from machine import Pin, SPI
 
 OUT     = 0
 IN      = 1
@@ -34,17 +34,16 @@ PUD_DOWN= 1
 PUD_UP  = 2
 
 class MCP():
-    """Base class to represent an MCP230xx series GPIO extender.  Is compatible
+    """Base class to represent an MCP23Sxx series GPIO extender.  Is compatible
     with the Adafruit_GPIO BaseGPIO class so it can be used as a custom GPIO
     class for interacting with device.
     """
 
-    def __init__(self, address=0x20, gpioScl=5, gpioSda=4):
-        """Initialize MCP230xx at specified I2C address and bus number.  If bus
-        is not specified it will default to the appropriate platform detected bus.
-        """
+    def __init__(self, spi=SPI(baudrate=1000000, polarity=0, bits=8, firstbit=SPI.MSB), cs=Pin(20, Pin.OUT, value=1), address=0x20):
         self.address = address
-        self.i2c = I2C(scl=Pin(gpioScl),sda=Pin(gpioSda))
+        self.spi = spi
+
+        self.cs = cs
         # Assume starting in ICON.BANK = 0 mode (sequential access).
         # Compute how many bytes are needed to store count of GPIO.
         self.gpio_bytes = self.NUM_GPIO//8
@@ -58,6 +57,7 @@ class MCP():
         self.gpinten = bytearray(self.gpio_bytes)
         self.intf = bytearray(self.gpio_bytes)
         self.iocon = bytearray(self.gpio_bytes)
+
         # Write current direction and pullup buffer state.
         self.write_iodir()
         self.write_gppu()
@@ -70,11 +70,25 @@ class MCP():
 
     def writeList(self, register, data):
         """Introduced to match the writeList implementation of the Adafruit I2C _device member"""
-        return self.i2c.writeto_mem(self.address, register, data)
+        try:
+            self.cs(0)                               # Select peripheral.
+            self.spi.write(self.address)             # Write address
+            self.spi.write(register)                 # Write register
+            self.spi.write(data)
+        finally:
+            self.cs(1) 
 
     def readList(self, register, length):
         """Introduced to match the readList implementation of the Adafruit I2C _device member"""
-        return self.i2c.readfrom_mem(self.address, register, length)
+        rxdata = bytearray(length)
+        try:
+            self.cs(0)                               # Select peripheral.
+            self.spi.write(self.address)             # Write address
+            self.spi.write(register)                 # Write register
+            self.spi.readinto(rxdata, 0x0)                     # Read data
+        finally:
+            self.cs(1) 
+        return rxdata
 
     def setup(self, pin, value):
         """Set the input or output mode for a specified pin.  Mode should be
@@ -305,8 +319,8 @@ class MCP():
             self.iocon = iocon
         self.writeList(self.IOCON, self.iocon)
 
-class MCP23017(MCP):
-    """MCP23017-based GPIO class with 16 GPIO pins."""
+class MCP23S17(MCP):
+    """MCP23S17-based GPIO class with 16 GPIO pins."""
     # Define number of pins and registor addresses.
     NUM_GPIO = 16
     IODIR    = 0x00
@@ -320,8 +334,8 @@ class MCP23017(MCP):
     INTCAP   = 0x10 # Interrupt Captured Value For Port Register
 
 
-class MCP23008(MCP):
-    """MCP23008-based GPIO class with 8 GPIO pins."""
+class MCP23S08(MCP):
+    """MCP23S08-based GPIO class with 8 GPIO pins."""
     # Define number of pins and registor addresses.
     NUM_GPIO = 8
     IODIR    = 0x00
@@ -335,7 +349,7 @@ class MCP23008(MCP):
     INTCAP   = 0x08 # Interrupt Captured Value For Port Register
 
 if __name__=="__main__":
-    io = MCP23017()
+    io = MCP23S17()
     io.setup(3,IN)
     io.setup(0,OUT)
     io.output(0,HIGH)

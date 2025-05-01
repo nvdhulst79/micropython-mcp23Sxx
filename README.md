@@ -6,7 +6,7 @@ This is a work in progress, NOT a working driver (yet). This readme is not fully
 
 To use, wire up the GPIO expander chip following this loom...
 
-* MCP23017 Pins
+* MCP23S17 Pins
   * 9 => 3.3V supply
   * 10 => GND
   * 12 => ESP8266 GPIO5 (NodeMCU D1) [I2C SCL Signal]
