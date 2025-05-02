@@ -127,6 +127,19 @@ class MCP():
         # Write GPIO state.
         self.write_gpio()
 
+    def toggle(self, pin):
+        """Toggle the specified pin. Inverting the previous value
+        """
+        self.toggle_pins([pin])
+        
+    def toggle_pins(self, pins):
+        """Toggle multiple pins specified in the given list
+        """
+        [self._validate_pin(pin) for pin in pins]
+        for pin in pins:
+            self.gpio[int(pin/8)] ^= 1 << (int(pin%8))  # XOR the pin value
+        # Write GPIO state.
+        self.write_gpio()
 
     def input(self, pin, read=True):
         """Read the specified pin and return HIGH/True if the pin is pulled
