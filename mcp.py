@@ -73,9 +73,9 @@ class MCP():
         """Introduced to match the writeList implementation of the Adafruit I2C _device member"""
         try:
             self.cs(0)                               # Select peripheral.
-            self.spi.write(self.address)             # Write address
-            self.spi.write(register)                 # Write register
-            self.spi.write(data)
+            self.spi.write(self.address << 1)        # Write address
+            self.spi.write(register)                 # Register
+            self.spi.write(data)                     # Write data
         finally:
             self.cs(1) 
 
@@ -84,9 +84,9 @@ class MCP():
         rxdata = bytearray(length)
         try:
             self.cs(0)                               # Select peripheral.
-            self.spi.write(self.address)             # Write address
-            self.spi.write(register)                 # Write register
-            self.spi.readinto(rxdata, 0x0)                     # Read data
+            self.spi.write((self.address << 1) | 1)  # Read address
+            self.spi.write(register)                 # register
+            self.spi.readinto(rxdata, 0x0)           # Read data
         finally:
             self.cs(1) 
         return rxdata

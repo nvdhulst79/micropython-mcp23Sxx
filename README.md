@@ -4,24 +4,6 @@ Micropython SPI version of https://github.com/dsiggi/micropython-mcp230xx (I2C).
 
 This is a work in progress, NOT a working driver (yet). This readme is not fully updated yet, consider anything below this as incorrect in regards to this fork!
 
-To use, wire up the GPIO expander chip following this loom...
-
-* MCP23S17 Pins
-  * 9 => 3.3V supply
-  * 10 => GND
-  * 12 => ESP8266 GPIO5 (NodeMCU D1) [I2C SCL Signal]
-  * 13 => ESP8266 GPIO3 (NodeMCU D2) [I2C SDA Signal]
-  * 12 => 10kOhm resistor => 3.3V Supply [I2C SCL Pull-up]
-  * 13 => 10kOhm resistor => 3.3V Supply [I2C SDA Pull-up]
-  * 18 => 10kOhm resistor => 3.3V Supply [Reset pin in 'run' configuration]
-
-Also choose the address of each MCP23017, e.g.
-
-* Addressing pins for address 0x20
-  * 15 => 10kOhm resistor => GND
-  * 16 => 10kOhm resistor => GND
-  * 17 => 10kOhm resistor => GND
-
 The mappings between pins and I2C addresses are...
 
 ![Pin pull table](http://raspi.tv/wp-content/uploads/2013/07/MCP23017-addresspins1.jpg)
