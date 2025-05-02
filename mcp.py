@@ -171,7 +171,7 @@ class MCP():
         self.gpio = self.readList(self.GPIO, self.gpio_bytes)
 
     def write_gpio(self, gpio=None):
-        """Write the specified byte value to the GPIO registor.  If no value
+        """Write the specified byte value to the GPIO register.  If no value
         specified the current buffered value will be written.
         """
         if gpio is not None:
@@ -179,7 +179,7 @@ class MCP():
         self.writeList(self.GPIO, self.gpio)
 
     def write_iodir(self, iodir=None):
-        """Write the specified byte value to the IODIR registor.  If no value
+        """Write the specified byte value to the IODIR register.  If no value
         specified the current buffered value will be written.
         """
         if iodir is not None:
@@ -187,7 +187,7 @@ class MCP():
         self.writeList(self.IODIR, self.iodir)
 
     def write_gppu(self, gppu=None):
-        """Write the specified byte value to the GPPU registor.  If no value
+        """Write the specified byte value to the GPPU register.  If no value
         specified the current buffered value will be written.
         """
         if gppu is not None:
@@ -229,7 +229,7 @@ class MCP():
         self.write_intcon()
 
     def write_intcon(self, intcon=None):
-        """Write the specified byte value to the INTCON registor.  If no value
+        """Write the specified byte value to the INTCON register.  If no value
         specified the current buffered value will be written.
         """
         if intcon is not None:
@@ -237,7 +237,7 @@ class MCP():
         self.writeList(self.INTCON, self.intcon)
 
     def write_defval(self, defval=None):
-        """Write the specified byte value to the DEFVAL registor.  If no value
+        """Write the specified byte value to the DEFVAL register.  If no value
         specified the current buffered value will be written.
         """
         if defval is not None:
@@ -245,7 +245,7 @@ class MCP():
         self.writeList(self.DEFVAL, self.defval)
 
     def write_gpinten(self, gpinten=None):
-        """Write the specified byte value to the GPINTEN registor.  If no value
+        """Write the specified byte value to the GPINTEN register.  If no value
         specified the current buffered value will be written.
         """
         if gpinten is not None:
@@ -254,7 +254,7 @@ class MCP():
 
     def read_interrupt_gpio(self):
         '''
-        Reads the pinnumber witch caused the interrupt from the INTF-Registor
+        Reads the pinnumber witch caused the interrupt from the INTF-register
         '''
         self.intf = self.readList(self.INTF, self.gpio_bytes)
      
@@ -276,7 +276,7 @@ class MCP():
 
     def read_captured_gpio(self):
         '''
-        Read the states of the gpios in the moment when the interrupt was captured from the INTCAP-Registor.
+        Read the states of the gpios in the moment when the interrupt was captured from the INTCAP-register.
         Returns a dict with all pins and thier states
         '''
         self.intcap = self.readList(self.INTCAP, self.gpio_bytes)
@@ -302,7 +302,7 @@ class MCP():
 
     def configure(self, int_mirror: bool=False, opendrain: bool=False, interrupt_polarity: bool=False, hardware_address: bool=False, disable_slewrate: bool=False, sequential: bool=False):
         """
-        Configures the IOCON registor
+        Configures the IOCON register
         int_mirror: true or false - Mirror the INTx Pins or not
         opendrain: true or false - Interrupt pins are Open-drain output or Actice driver output
         interrupt_polarity: true or false - INT pin is active high or low
@@ -348,7 +348,7 @@ class MCP():
         self.write_iocon()
 
     def write_iocon(self, iocon=None):
-        """Write the specified byte value to the IOCON registor.  If no value
+        """Write the specified byte value to the IOCON register.  If no value
         specified the current buffered value will be written.
         """
         if iocon is not None:
@@ -359,7 +359,7 @@ class MCP():
 
 class MCP23S17(MCP):
     """MCP23S17-based GPIO class with 16 GPIO pins."""
-    # Define number of pins and registor addresses.
+    # Define number of pins and register addresses.
     NUM_GPIO = 16
     IODIR    = 0x00 # Pin Input or Output register
     IPOL     = 0x01 # Polarity register
@@ -375,7 +375,7 @@ class MCP23S17(MCP):
 
 class MCP23S08(MCP):
     """MCP23S08-based GPIO class with 8 GPIO pins."""
-    # Define number of pins and registor addresses.
+    # Define number of pins and register addresses.
     NUM_GPIO = 8
     IODIR    = 0x00 # Pin Input or Output Register
     IPOL     = 0x01 # Polarity register
