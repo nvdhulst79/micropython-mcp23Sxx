@@ -49,6 +49,7 @@ class MCP():
         self.gpio_bytes = self.NUM_GPIO//8
         # Buffer register values so they can be changed without reading.
         self.iodir = bytearray(self.gpio_bytes)  # Default direction to all inputs.
+        self.ipol = bytearray(self.gpio_bytes)  # Default polarity is non-inverted
         self.gppu = bytearray(self.gpio_bytes)  # Default to pullups disabled.
         self.gpio = bytearray(self.gpio_bytes)
         self.intcon = bytearray(self.gpio_bytes)
@@ -156,6 +157,16 @@ class MCP():
             self.gppu[int(pin/8)] &= ~(1 << (int(pin%8)))
         self.write_gppu()
 
+    def polarity(self, pin, invert):
+        """Set the polarity of the pin. The inverted value will be on the output when True
+        """
+        self._validate_pin(pin)
+        if invert:
+            self.ipol[int(pin/8)] |= 1 << (int(pin%8))
+        else:
+            self.ipol[int(pin/8)] &= ~(1 << (int(pin%8)))
+        self.write_ipol()
+
     def read_gpio(self):
         self.gpio = self.readList(self.GPIO, self.gpio_bytes)
 
@@ -183,10 +194,18 @@ class MCP():
             self.gppu = gppu
         self.writeList(self.GPPU, self.gppu)
 
+    def write_ipol(self, ipol=None):
+        """Write the specified byte value to the IPOL register. If no value
+        specified the current buffered value will be written.
+        """
+        if ipol is not None:
+            self.ipol = ipol
+        self.writeList(self.IPOL, self.ipol)
+
     def set_interrupt(self, pin, interrupt_enable: bool, defval: bool=False, defval_value: bool=False):
         """
         Set the interrupt mode for a specified pin.
-        interrupt_enable: true or false - enable oder disable the interrupt feature
+        interrupt_enable: true or false - enable or disable the interrupt feature
         defval: true or false - Interrupt from DEFVAL register or pin change
         defval_value: 0 or 1 - Value for the DEFVal register when using defval
         """
@@ -281,20 +300,13 @@ class MCP():
 
         return states
 
-    def configure(self, int_mirror: bool=False, opendrain: bool=False, interrupt_polarity: bool=False):
+    def configure(self, int_mirror: bool=False, opendrain: bool=False, interrupt_polarity: bool=False, hardware_address: bool=False, disable_slewrate: bool=False, sequential: bool=False):
         """
         Configures the IOCON registor
         int_mirror: true or false - Mirror the INTx Pins or not
         opendrain: true or false - Interrupt pins are Open-drain output or Actice driver output
         interrupt_polarity: true or false - INT pin is active high or low
         """
-        if int_mirror:
-            self.iocon[0] |= 1 << 6
-            self.iocon[1] |= 1 << 6
-        else:
-            self.iocon[0] &= ~(1 << 6)
-            self.iocon[1] &= ~(1 << 6)
-
         if interrupt_polarity:
             self.iocon[0] |= 1 << 1
             self.iocon[1] |= 1 << 1
@@ -309,6 +321,30 @@ class MCP():
             self.iocon[0] &= ~(1 << 2)
             self.iocon[1] &= ~(1 << 2)
 
+        if hardware_address:
+            self.iocon[0] |= 1 << 3
+            self.iocon[1] |= 1 << 3
+        else:
+            self.iocon[0] &= ~(1 << 3)
+            self.iocon[1] &= ~(1 << 3)
+
+        if disable_slewrate:
+            self.iocon[0] |= 1 << 4
+            self.iocon[1] |= 1 << 4
+        else:
+            self.iocon[0] &= ~(1 << 4)
+            self.iocon[1] &= ~(1 << 4)
+
+        if int_mirror:
+            self.iocon[0] |= 1 << 6
+            self.iocon[1] |= 1 << 6
+        else:
+            self.iocon[0] &= ~(1 << 6)
+            self.iocon[1] &= ~(1 << 6)
+
+        # bit 5 is SEQOP, we keep this 0, since this affects how PORTB is accessed
+        # bit 7 is BANK, we keep this 0, since this affects the register adresses
+
         self.write_iocon()
 
     def write_iocon(self, iocon=None):
@@ -319,13 +355,16 @@ class MCP():
             self.iocon = iocon
         self.writeList(self.IOCON, self.iocon)
 
+
+
 class MCP23S17(MCP):
     """MCP23S17-based GPIO class with 16 GPIO pins."""
     # Define number of pins and registor addresses.
     NUM_GPIO = 16
-    IODIR    = 0x00
+    IODIR    = 0x00 # Pin Input or Output register
+    IPOL     = 0x01 # Polarity register
     GPIO     = 0x12
-    GPPU     = 0x0C
+    GPPU     = 0x0C # Pin Pullup register
     INTCON   = 0x08 # Interrupt-on-Change Control Register
     GPINTEN  = 0X04 # Interrupt-on-Change Pins
     DEFVAL   = 0x06 # Default Value Register
@@ -338,9 +377,10 @@ class MCP23S08(MCP):
     """MCP23S08-based GPIO class with 8 GPIO pins."""
     # Define number of pins and registor addresses.
     NUM_GPIO = 8
-    IODIR    = 0x00
+    IODIR    = 0x00 # Pin Input or Output Register
+    IPOL     = 0x01 # Polarity register
     GPIO     = 0x09
-    GPPU     = 0x06
+    GPPU     = 0x06 # Pin Pullup register
     INTCON   = 0x04 # Interrupt-on-Change Control Register
     GPINTEN  = 0X02 # Interrupt-on-Change Pins
     DEFVAL   = 0x03 # Default Value Register
