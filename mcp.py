@@ -39,11 +39,11 @@ class MCP():
     class for interacting with device.
     """
 
-    def __init__(self, spi=SPI(baudrate=1000000, polarity=0, bits=8, firstbit=SPI.MSB), cs=Pin(20, Pin.OUT, value=1), address=0x20):
+    def __init__(self, spi=SPI(baudrate=1000000, polarity=0, bits=8, firstbit=SPI.MSB), gpioCS=20, address=0x20):
         self.address = address
         self.spi = spi
 
-        self.cs = cs
+        self.cs = Pin(gpioCS, Pin.OUT, value=1)
         # Assume starting in ICON.BANK = 0 mode (sequential access).
         # Compute how many bytes are needed to store count of GPIO.
         self.gpio_bytes = self.NUM_GPIO//8
