@@ -92,17 +92,30 @@ class MCP():
         return rxdata
 
     def setup(self, pin, value):
-        """Set the input or output mode for a specified pin.  Mode should be
-        either OUT or IN.
         """
-        self._validate_pin(pin)
-        # Set bit to 1 for input or 0 for output.
-        if value == IN:
-            self.iodir[int(pin/8)] |= 1 << (int(pin%8))
-        elif value == OUT:
-            self.iodir[int(pin/8)] &= ~(1 << (int(pin%8)))
-        else:
-            raise ValueError('Unexpected value.  Must be IN or OUT.')
+        Set the input or output mode for a specified pin.  
+        
+        Mode should be either OUT or IN.
+        """
+        
+        self.setup_pins({pin: value})
+
+    def setup_pins(self, pins):
+        """
+        Set input or output mode for multiple pins.
+
+        Pins should be a dict of pin name to pin mode (IN/OUT)
+        """
+
+        [self._validate_pin(pin) for pin in pins.keys()]
+        # Set each pin's input bit. 1 for input, 0 for output
+        for pin, value in iter(pins.items()):
+            if value == IN:
+                self.iodir[int(pin/8)] |= 1 << (int(pin%8))
+            elif value == OUT:
+                self.iodir[int(pin/8)] &= ~(1 << (int(pin%8)))
+            else:
+                raise ValueError('Unexpected value.  Must be IN or OUT.')
         self.write_iodir()
 
 
