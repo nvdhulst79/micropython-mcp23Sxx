@@ -176,21 +176,37 @@ class MCP():
         """Turn on the pull-up resistor for the specified pin if enabled is True,
         otherwise turn off the pull-up resistor.
         """
-        self._validate_pin(pin)
-        if enabled:
-            self.gppu[int(pin/8)] |= 1 << (int(pin%8))
-        else:
-            self.gppu[int(pin/8)] &= ~(1 << (int(pin%8)))
+        self.pullup_pins({pin: enabled})
+
+    def pullup_pins(self, pins):
+        """
+        Turn on the pull-up resistor for multiple pins if enabledd is TRUE
+        """
+
+        [self._validate_pin(pin) for pin in pins.keys()]
+        for pin, enabled in iter(pins.items()):
+            if enabled:
+                self.gppu[int(pin/8)] |= 1 << (int(pin%8))
+            else:
+                self.gppu[int(pin/8)] &= ~(1 << (int(pin%8)))
         self.write_gppu()
 
     def polarity(self, pin, invert):
         """Set the polarity of the pin. The inverted value will be on the output when True
         """
-        self._validate_pin(pin)
-        if invert:
-            self.ipol[int(pin/8)] |= 1 << (int(pin%8))
-        else:
-            self.ipol[int(pin/8)] &= ~(1 << (int(pin%8)))
+        self.polarity_pins({pin: invert})
+
+    def polarity_pins(self, pins):
+        """
+        Set the polarity for multiple pins.
+        """
+
+        [self._validate_pin(pin) for pin in pins.keys()]
+        for pin, invert in iter(pins.items()):
+            if invert:
+                self.ipol[int(pin/8)] |= 1 << (int(pin%8))
+            else:
+                self.ipol[int(pin/8)] &= ~(1 << (int(pin%8)))
         self.write_ipol()
 
     def read_gpio(self):
@@ -326,7 +342,7 @@ class MCP():
 
         return states
 
-    def configure(self, int_mirror: bool=False, opendrain: bool=False, interrupt_polarity: bool=False, hardware_address: bool=False, disable_slewrate: bool=False, sequential: bool=False):
+    def configure(self, int_mirror: bool=False, opendrain: bool=False, interrupt_polarity: bool=False, hardware_address: bool=False, disable_slewrate: bool=False):
         """
         Configures the IOCON register
         int_mirror: true or false - Mirror the INTx Pins or not
